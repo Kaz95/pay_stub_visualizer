@@ -1,10 +1,23 @@
 from tkinter import *
+from matplotlib.backends.backend_tkagg import (
+    FigureCanvasTkAgg, NavigationToolbar2Tk)
+
+import matplotlib.pyplot as plt
 
 
 class MainWindow:
     def __init__(self, root):
         self.root = root
 
+    def clear(self):
+        for widget in self.root.grid_slaves():
+            widget.grid_forget()
+
+
+class InputWindow(MainWindow):
+    def __init__(self, root):
+
+        MainWindow.__init__(self, root)
         self.input_frame = LabelFrame(root, text='Input')
         self.button_frame = Frame(root)
 
@@ -19,8 +32,8 @@ class MainWindow:
         self.withholding_input = Entry(self.input_frame)
         self.post_tax_input = Entry(self.input_frame)
 
-        self.prev_button = Button(self.button_frame, text='Previous')
-        self.next_button = Button(self.button_frame, text='Next', width=7)
+        self.prev_button = Button(self.button_frame, text='<--', width=7)
+        self.next_button = Button(self.button_frame, text='-->', width=7, command=self.next_command)
 
         self.month_label.grid(row=0, columnspan=2)
 
@@ -42,9 +55,45 @@ class MainWindow:
         self.input_frame.grid(row=0)
         self.button_frame.grid(row=1)
 
+    def next_command(self):
+        OutputWindow(self.root)
+
+
+class OutputWindow(MainWindow):
+    def __init__(self, root):
+        MainWindow.__init__(self, root)
+        self.clear()
+        # Pie chart, where the slices will be ordered and plotted counter-clockwise:
+
+        # Outer labels for each slice
+        labels = ['Take Home', 'Pre', 'Withheld', 'Post']
+        # Percentages as integers. Dictate size of each slcie
+        sizes = [15, 33.5, 45, 6.5]
+        # 0 Means no 'explode' of emphasis on a given slice. Higher the number, greater the offset
+        explode = [0.1, 0, 0, 0]
+
+        fig1 = plt.figure(figsize=(12, 5))
+        # TODO: I need to cement my understanding of subplots.
+        # fig1, ax1 = plt.subplots(figsize=(12, 5))
+
+        # Declaring my pie plot
+        pie_chart = plt.pie(sizes, explode=explode, labels=labels, autopct='%1.1f%%', shadow=False, startangle=90)
+        # Ensures pie is drawn as circle
+        plt.axis('equal')
+
+        # First two params position, third is the content, bbox= is an option keyword arg that gives text a border.
+        plt.text(2, 1, 'Ima String: Ima number', bbox=dict(facecolor='red', alpha=0.5))
+        # Opens the plot I've been drawing in the background up until this point
+        # plt.show()
+
+        canvas = FigureCanvasTkAgg(fig1, master=self.root)
+        canvas.draw()
+        canvas.get_tk_widget().grid(sticky=W+E+S+N)
+
+
 
 
 if __name__ == '__main__':
     main = Tk()
-    MainWindow(main)
+    InputWindow(main)
     main.mainloop()
