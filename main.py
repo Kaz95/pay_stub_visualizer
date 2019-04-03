@@ -43,9 +43,11 @@ class DoublyLinkedList:
             if self.tail is not None:
                 new_node = Node(new_val)
                 self.tail.next = new_node
+                new_node.prev = self.tail
                 self.tail = new_node
             else:
                 self.tail = Node(new_val)
+                self.tail.prev = self.head
                 self.head.next = self.tail
 
         else:
